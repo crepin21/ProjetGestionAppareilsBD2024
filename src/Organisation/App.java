@@ -1,8 +1,8 @@
 /*
-  Titre      : ManipulationDataBase
+  Titre      : ManipulationDataBase(Partie 1)
   Auteur     : Crepin Vardin Fouelefack
   Date       : 15/01/2024
-  Description: Programme permettant de manipuler les BD en vue d'interagir avec des appareils IoT du monde reel
+  Description: Programme permettant de manipuler les BD en vue d'interagir avec des appareils IoT du monde reel 
   Version    : 0.0.1
 */
 package Organisation;
