@@ -1,29 +1,31 @@
 package Organisation.Models;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;//import
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Queue;
 import java.util.Scanner;
+import java.util.Stack;
+import java.util.LinkedList;
 
-public class ParametreDB implements AutoCloseable
-{
+
+public class ObjetConnecte extends Objet implements AutoCloseable {
+
+
+    // Constructeur par défaut
+    public ObjetConnecte() {
+        //
+    }
+
     
-    private Connection conn;
-    Scanner scanner = new Scanner(System.in);
     
     /*
      * Methode pour la connexion a la BD
      */
-    public void connexion() 
-    {
-        try 
-        {
+    public void connexion() {
+        try {
             String dbURL2 = "jdbc:postgresql://localhost:5432/DataJava";
             String user = "postgres";
             String pass = "crepin";
@@ -32,24 +34,18 @@ public class ParametreDB implements AutoCloseable
             if (conn != null) {
                 System.out.println("Connected to database. Bievenue user Postgres");
             }
-            createTable();  //Creation de la table apres la connexion a la BD si elle n'existe pas
-        } catch (SQLException ex) 
-        {
+            createTable();  
+        } catch (SQLException ex) {
             System.out.println("Erreur de connection a la BD: " + ex.getMessage());
         }
     }
 
-    /*
-     * Methode permettant de creer une table d'apareils
-     */
     public void createTable() {
-        // Création de la table pour les capteurs
         String createSensorsTableSQL = "CREATE TABLE IF NOT EXISTS sensors (" +
                 "id SERIAL PRIMARY KEY, " +
                 "appareil_name TEXT, " +
                 "appareil_status VARCHAR(50))";
-        
-        // Création de la table pour les actionneurs
+
         String createActuatorsTableSQL = "CREATE TABLE IF NOT EXISTS actuators (" +
                 "id SERIAL PRIMARY KEY, " +
                 "appareil_name TEXT, " +
@@ -64,6 +60,7 @@ public class ParametreDB implements AutoCloseable
         }
     }
 
+    //Methode pour ajouter un appareil
     public void ajouterAppareil() {
         System.out.print("Nom de l'appareil : ");
         String appareil_name = scanner.nextLine();
@@ -168,7 +165,7 @@ public class ParametreDB implements AutoCloseable
         System.out.print("Voulez-vous vraiment supprimer cet appareil? (oui pour supprimer): ");
         String confirmation = scanner.nextLine().toLowerCase();
         if (!confirmation.equals("oui")) {
-            System.out.println("Suppression annulée");
+            System.out.println("Suppression annulee");
             return;
         }
     
@@ -217,7 +214,7 @@ public class ParametreDB implements AutoCloseable
         }
     }
     
-    // Méthodes utilitaires pour vérifier si un appareil est un capteur ou un actionneur
+    // Méthodes pour vérifier si un appareil est un capteur ou un actionneur
     private boolean isSensor(String appareil_name) {
         String selectSQL = "SELECT COUNT(*) FROM sensors WHERE appareil_name = ?";
         return checkTableForAppareil(selectSQL, appareil_name);
@@ -241,42 +238,5 @@ public class ParametreDB implements AutoCloseable
             return false;
             }
         }
-
-    /*
-     * Methode pour fermer la connexion a la BD
-     */
-    @Override
-    public void close() 
-    {
-        try 
-        {
-            if (conn != null && !conn.isClosed()) {
-                conn.close();
-                System.out.println("Connection fermee");
-            }
-        } catch (SQLException ex) 
-        {
-            ex.printStackTrace();
-        }
-    }
-    /*
-     * Fonction de verification d'entier
-     */
-    public int verificationEntier()
-    {
-        String option = null;
-            int val = 0;
-            try {
-            BufferedReader is = new BufferedReader(
-            new InputStreamReader(System.in));
-            option = is.readLine();
-            val = Integer.parseInt(option);
-            } catch (NumberFormatException ex) {
-            System.err.println("Not a valid number: " + option);
-            } catch (IOException e) {
-            System.err.println("Unexpected IO ERROR: " + e);
-            }
-            return val;
-    }
-
+    
 }

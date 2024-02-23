@@ -3,10 +3,10 @@
   Auteur     : Crepin Vardin Fouelefack
   Date       : 15/01/2024
   Description: Programme permettant de manipuler les BD en vue d'interagir avec des appareils IoT du monde reel
-  Version    : 0.0.1
+  Version    : 0.0.1 (Partie 2)
 */
 package Organisation;
-import Organisation.Models.ParametreDB;
+import Organisation.Models.*;
 /** 
  * Recherche Comment serialiser et deserialiser un objet
  * www.codejava.net
@@ -14,6 +14,7 @@ import Organisation.Models.ParametreDB;
  * 
  
  * @author Crepin
+ * 
  */
 
  public class App 
@@ -22,9 +23,9 @@ import Organisation.Models.ParametreDB;
     public static void main(String[] args) 
   {
        // Scanner scanner = new Scanner(System.in);
-    try (ParametreDB parametre = new ParametreDB();)  // Creation de l'objet dans le try pour pouvoir appele directement la methode close()
+    try (ObjetConnecte ObjetConnecte = new ObjetConnecte();)  // Creation de l'objet dans le try pour pouvoir appele directement la methode close()
     {
-        parametre.connexion(); // Connexion a la base de donnees
+        ObjetConnecte.connexion(); // Connexion a la base de donnees
 
         //Menu principal
         while (true) 
@@ -36,21 +37,21 @@ import Organisation.Models.ParametreDB;
             System.out.println("5-Quitter");
             System.out.print("Veiller choisir une option svp: ");
 
-            switch (parametre.verificationEntier()) { // Appel de la methode pour verifier si l'entree est un entier
+            switch (ObjetConnecte.verificationEntier()) { // Appel de la methode pour verifier si l'entree est un entier
                 case 1:
-                    parametre.ajouterAppareil();
+                    ObjetConnecte.ajouterAppareil();
                     break;
                 case 2:
-                    parametre.afficherAppareil(); // Afficher les appareils correspondant au nom spécifié
+                    ObjetConnecte.afficherAppareil(); // Afficher les appareils correspondant au nom spécifié
                     break;
                 case 3:
-                    parametre.modifierAppareil();
+                    ObjetConnecte.modifierAppareil();
                     break;
                 case 4:
-                    parametre.supprimerAppareil();
+                    ObjetConnecte.supprimerAppareil();
                     break;
                 case 5:
-                    parametre.close();
+                    ObjetConnecte.close();
                     System.exit(0);
                     break;
                 default:
