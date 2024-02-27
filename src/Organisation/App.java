@@ -10,7 +10,8 @@ import Organisation.Models.ParametreDB;
 /** 
  * Recherche Comment serialiser et deserialiser un objet
  * www.codejava.net
- * https://www.postgresqltutorial.com/postgresql-jdbc/
+ * https://www.postgresqltutorial.com/postgresql-jdbc/eragrst
+ * 
  
  * @author Crepin
  */
@@ -29,8 +30,8 @@ import Organisation.Models.ParametreDB;
         while (true) 
         {
             System.out.println("\n1-Ajouter un appareil");
-            System.out.println("2- Afficher les appareils");
-            System.out.println("3- Mettre a jour l'etat de fonctionnement");
+            System.out.println("2- Afficher appareil");
+            System.out.println("3- Mettre a jour un appareil");
             System.out.println("4-Supprimer un appareil");
             System.out.println("5-Quitter");
             System.out.print("Veiller choisir une option svp: ");
@@ -40,10 +41,10 @@ import Organisation.Models.ParametreDB;
                     parametre.ajouterAppareil();
                     break;
                 case 2:
-                    parametre.afficherAppareils();          //Appel de la methode en fonction de l'entree choisis (1 a 5)
+                    parametre.afficherAppareil(); // Afficher les appareils correspondant au nom spécifié
                     break;
                 case 3:
-                    parametre.modifierStatus();
+                    parametre.modifierAppareil();
                     break;
                 case 4:
                     parametre.supprimerAppareil();

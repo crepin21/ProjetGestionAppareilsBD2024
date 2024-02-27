@@ -43,108 +43,204 @@ public class ParametreDB implements AutoCloseable
      * Methode permettant de creer une table d'apareils
      */
     public void createTable() {
-        //Creation de la table appareils si elle n'existe pas
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS apareils " +
-                "(ID INT PRIMARY KEY, " +
-                " appareil_name TEXT, " +
-                " appareil_type VARCHAR(100), " +
-                " appareil_status VARCHAR(50))";
+        // Création de la table pour les capteurs
+        String createSensorsTableSQL = "CREATE TABLE IF NOT EXISTS sensors (" +
+                "id SERIAL PRIMARY KEY, " +
+                "appareil_name TEXT, " +
+                "appareil_status VARCHAR(50))";
+        
+        // Création de la table pour les actionneurs
+        String createActuatorsTableSQL = "CREATE TABLE IF NOT EXISTS actuators (" +
+                "id SERIAL PRIMARY KEY, " +
+                "appareil_name TEXT, " +
+                "appareil_status VARCHAR(50))";
 
         try (Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate(createTableSQL);
-            System.out.println("La table a ete creee ou existait");
+            stmt.executeUpdate(createSensorsTableSQL);
+            stmt.executeUpdate(createActuatorsTableSQL);
+            System.out.println("Les tables ont été créées ou existaient déjà");
         } catch (SQLException ex) {
-            System.out.println("Erreur lors de la creation de la table pour les # appareils: " + ex.getMessage());
+            System.out.println("Erreur lors de la création des tables : " + ex.getMessage());
         }
     }
 
     public void ajouterAppareil() {
-
-        System.out.print("Numero d'identification : ");
-        int id                 = verificationEntier();
         System.out.print("Nom de l'appareil : ");
-        String appareil_name   = scanner.nextLine();
-        System.out.print("Type de l'appareil : ");
-        String appareil_type   = scanner.nextLine();
+        String appareil_name = scanner.nextLine();
+        System.out.print("Type de l'appareil (Capteur/Actuateur) : ");
+        String appareil_type = scanner.nextLine();
         System.out.print("Statut de l'appareil : ");
         String appareil_status = scanner.nextLine();
 
-        // Ajout de l'appareil a la base de donnees
-        String insertSQL = "INSERT INTO apareils (id, appareil_name, appareil_type, appareil_status) VALUES (?, ?, ?, ?)";
+        String insertSQL;
+        if ("Capteur".equalsIgnoreCase(appareil_type)) {
+            insertSQL = "INSERT INTO sensors (appareil_name, appareil_status) VALUES (?, ?)";
+        } else if ("Actuateur".equalsIgnoreCase(appareil_type)) {
+            insertSQL = "INSERT INTO actuators (appareil_name, appareil_status) VALUES (?, ?)";
+        } else {
+            System.out.println("Type d'appareil non pris en charge");
+            return;
+        }
+
         try (PreparedStatement preparedStatement = conn.prepareStatement(insertSQL)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.setString(2, appareil_name);
-            preparedStatement.setString(3, appareil_type);
-            preparedStatement.setString(4, appareil_status);
+            preparedStatement.setString(1, appareil_name);
+            preparedStatement.setString(2, appareil_status);
 
             int rowsInserted = preparedStatement.executeUpdate();
             if (rowsInserted > 0) {
-                System.out.println("L'appareil a ete ajoute");
+                System.out.println("L'appareil a été ajouté");
             }
         } catch (SQLException ex) {
-            System.out.println("Erreur lors de l'ajout d'un appareil: " + ex.getMessage());
+            System.out.println("Erreur lors de l'ajout d'un appareil : " + ex.getMessage());
         }
     }
 
-    public void modifierStatus() {
-        System.out.print("Entrer l'ID de l'appareil a mettre a jour : ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        System.out.print("Entrer le nouveau type de l'appareil : ");
-        String nouveauType = scanner.nextLine();
+    public void modifierAppareil() {
+        System.out.print("Entrer le nom de l'appareil à mettre à jour : ");
+        String nomAppareil = scanner.nextLine();
+        System.out.print("Entrer le nouveau type de l'appareil (Capteur/Actuateur) : ");
+        String nouveauType = scanner.nextLine().toLowerCase(); //Conversion en minuscule
+        System.out.print("Entrer le nouveau statut de l'appareil : ");
+        String nouveauStatut = scanner.nextLine();
     
-        // Mise a jour du type de l'appareil
-        String updateSQL = "UPDATE apareils SET appareil_type = ? WHERE id = ?";
+        // Recherche de l'ID de l'appareil et de la table correspondante
+        int id = -1;
+        String table;
+        String selectIDSQL = "SELECT id FROM ";
+        if ("capteur".equalsIgnoreCase(nouveauType)) {
+            table = "sensors";
+        } else if ("actuateur".equalsIgnoreCase(nouveauType)) {
+            table = "actuators";
+        } else {
+            System.out.println("Type d'appareil non pris en charge");
+            return;
+        }
+        selectIDSQL += table + " WHERE appareil_name = ?";
+        try (PreparedStatement preparedStatement = conn.prepareStatement(selectIDSQL)) {
+            preparedStatement.setString(1, nomAppareil);
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt("id");
+            }
+        } catch (SQLException ex) {
+            System.out.println("Erreur lors de la recherche de l'ID de l'appareil : " + ex.getMessage());
+        }
+    
+        // Vérification de l'existence de l'appareil
+        if (id == -1) {
+            System.out.println("Aucun appareil trouvé avec le nom spécifié");
+            return;
+        }
+    
+        // Mise à jour de l'appareil dans la table correspondante
+        String updateSQL = "UPDATE " + table + " SET appareil_status = ? WHERE id = ?";
         try (PreparedStatement preparedStatement = conn.prepareStatement(updateSQL)) {
-            preparedStatement.setString(1, nouveauType);
+            preparedStatement.setString(1, nouveauStatut);
             preparedStatement.setInt(2, id);
     
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
-                System.out.println("Type de l'appareil mis a jour");
+                System.out.println("Statut de l'appareil mis à jour");
             } else {
-                System.out.println("Aucun appareil trouve avec l'ID specifie");
+                System.out.println("Aucun appareil trouvé avec l'ID spécifié");
             }
         } catch (SQLException ex) {
-            System.out.println("Erreur lors de la mise a jour du statut de l'appareil : " + ex.getMessage());
+            System.out.println("Erreur lors de la mise à jour du statut de l'appareil : " + ex.getMessage());
         }
     }
     
     public void supprimerAppareil() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Entrer l'ID de l'appareil a supprimer: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
+        System.out.print("Entrer le nom de l'appareil à supprimer: ");
+        String nomAppareil = scanner.nextLine();
     
-        // Supprimer l'appareil de la base de donnees
-        String deleteSQL = "DELETE FROM apareils WHERE id = ?";
+        // Recherche de la table correspondante
+        String table;
+        if (isSensor(nomAppareil)) {
+            table = "sensors";
+        } else if (isActuator(nomAppareil)) {
+            table = "actuators";
+        } else {
+            System.out.println("Aucun appareil trouvé avec le nom spécifié");
+            return;
+        }
+    
+        // Confirmation de la suppression
+        System.out.print("Voulez-vous vraiment supprimer cet appareil? (oui pour supprimer): ");
+        String confirmation = scanner.nextLine().toLowerCase();
+        if (!confirmation.equals("oui")) {
+            System.out.println("Suppression annulée");
+            return;
+        }
+    
+        // Supprimer l'appareil de la table correspondante
+        String deleteSQL = "DELETE FROM " + table + " WHERE appareil_name = ?";
         try (PreparedStatement preparedStatement = conn.prepareStatement(deleteSQL)) {
-            preparedStatement.setInt(1, id);
+            preparedStatement.setString(1, nomAppareil);
     
             int rowsDeleted = preparedStatement.executeUpdate();
             if (rowsDeleted > 0) {
-                System.out.println("Appareil supprime avec succes");
+                System.out.println("Appareil supprimé avec succès");
             } else {
-                System.out.println("Aucun appareil trouve avec l'ID mentionne");
+                System.out.println("Aucun appareil trouvé avec le nom spécifié");
             }
         } catch (SQLException ex) {
             System.out.println("Erreur lors de la suppression de l'appareil : " + ex.getMessage());
         }
     }
-
-    public void afficherAppareils() {
-        // Afficher tous les appareils de la base de donnees
-        String selectSQL = "SELECT * FROM apareils";
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(selectSQL)) {
+    
+    public void afficherAppareil() {
+        System.out.print("Entrez le nom de l'appareil à afficher: ");
+        String nomAppareil = scanner.nextLine();
+    
+        // Recherche de la table correspondante
+        String table;
+        if (isSensor(nomAppareil)) {
+            table = "sensors";
+        } else if (isActuator(nomAppareil)) {
+            table = "actuators";
+        } else {
+            System.out.println("Aucun appareil trouvé avec le nom spécifié");
+            return;
+        }
+    
+        // Afficher les informations de l'appareil de la table correspondante
+        String selectSQL = "SELECT * FROM " + table + " WHERE appareil_name = ?";
+        try (PreparedStatement preparedStatement = conn.prepareStatement(selectSQL)) {
+            preparedStatement.setString(1, nomAppareil);
+            ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                //Affichage de qq informations
-                System.out.println("ID : " + rs.getInt("id") + ", Nom : " + rs.getString("appareil_name") + ",      Type: " + rs.getString("appareil_type") + ",         Etat : " + rs.getString("appareil_status"));
+                //Affichage des informations de l'appareil
+                System.out.println("ID : " + rs.getInt("id") + ", Nom : " + rs.getString("appareil_name") + ",      Statut : " + rs.getString("appareil_status"));
             }
         } catch (SQLException ex) {
-            System.out.println("Erreur lors de l'affichage des appareils: " + ex.getMessage());
+            System.out.println("Erreur lors de l'affichage de l'appareil : " + ex.getMessage());
         }
     }
+    
+    // Méthodes utilitaires pour vérifier si un appareil est un capteur ou un actionneur
+    private boolean isSensor(String appareil_name) {
+        String selectSQL = "SELECT COUNT(*) FROM sensors WHERE appareil_name = ?";
+        return checkTableForAppareil(selectSQL, appareil_name);
+    }
+    
+    private boolean isActuator(String appareil_name) {
+        String selectSQL = "SELECT COUNT(*) FROM actuators WHERE appareil_name = ?";
+        return checkTableForAppareil(selectSQL, appareil_name);
+    }
+    
+    private boolean checkTableForAppareil(String selectSQL, String appareil_name) 
+    {
+        try (PreparedStatement preparedStatement = conn.prepareStatement(selectSQL)) {
+            preparedStatement.setString(1, appareil_name);
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            int count = rs.getInt(1);
+            return count > 0;
+            } catch (SQLException ex) {
+            System.out.println("Erreur lors de la vérification de l'appareil dans la table : " + ex.getMessage());
+            return false;
+            }
+        }
 
     /*
      * Methode pour fermer la connexion a la BD
