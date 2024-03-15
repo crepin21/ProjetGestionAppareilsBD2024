@@ -46,7 +46,7 @@ public class ObjetConnecte extends Objet implements AutoCloseable {
                 "appareil_name TEXT, " +
                 "appareil_status VARCHAR(50))";
 
-        String createActuatorsTableSQL = "CREATE TABLE IF NOT EXISTS actuators (" +
+        String createActuatorsTableSQL = "CREATE TABLE IF NOT EXISTS sensors (" +
                 "id SERIAL PRIMARY KEY, " +
                 "appareil_name TEXT, " +
                 "appareil_status VARCHAR(50))";
@@ -61,36 +61,34 @@ public class ObjetConnecte extends Objet implements AutoCloseable {
     }
 
     //Methode pour ajouter un appareil
-    public void ajouterAppareil() {
-        System.out.print("Nom de l'appareil : ");
-        String appareil_name = scanner.nextLine();
-        System.out.print("Type de l'appareil (Capteur/Actuateur) : ");
-        String appareil_type = scanner.nextLine();
-        System.out.print("Statut de l'appareil : ");
-        String appareil_status = scanner.nextLine();
-
+    public void ajouterAppareil(String appareil_name, String appareil_type, String temperature, String humidity) {
+        
         String insertSQL;
         if ("Capteur".equalsIgnoreCase(appareil_type)) {
-            insertSQL = "INSERT INTO sensors (appareil_name, appareil_status) VALUES (?, ?)";
+            insertSQL = "INSERT INTO sensors (appareil_name, appareil_status, temperature, humidity) VALUES (?, ?, ?, ?)";
         } else if ("Actuateur".equalsIgnoreCase(appareil_type)) {
-            insertSQL = "INSERT INTO actuators (appareil_name, appareil_status) VALUES (?, ?)";
+            insertSQL = "INSERT INTO actuators (appareil_name, appareil_status, temperature, humidity) VALUES (?, ?, ?, ?)";
         } else {
             System.out.println("Type d'appareil non pris en charge");
             return;
         }
-
+    
         try (PreparedStatement preparedStatement = conn.prepareStatement(insertSQL)) {
             preparedStatement.setString(1, appareil_name);
-            preparedStatement.setString(2, appareil_status);
-
+            preparedStatement.setString(2, appareil_type);
+            preparedStatement.setString(3, temperature);
+            preparedStatement.setString(4, humidity);
+    
             int rowsInserted = preparedStatement.executeUpdate();
             if (rowsInserted > 0) {
-                System.out.println("L'appareil a été ajouté");
+                System.out.println("L'appareil a été ajouté avec succès");
             }
         } catch (SQLException ex) {
             System.out.println("Erreur lors de l'ajout d'un appareil : " + ex.getMessage());
         }
     }
+       
+    
 
     public void modifierAppareil() {
         System.out.print("Entrer le nom de l'appareil à mettre à jour : ");
