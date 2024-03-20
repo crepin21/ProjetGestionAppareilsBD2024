@@ -1,6 +1,9 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "c:\\Users\\crepi\\Downloads\\postgresql-42.6.1-20230508.083352-18-all.jar"
-    ]
+        "c:\\Users\\crepi\\Downloads\\postgresql-42.6.1-20230508.083352-18-all.jar",
+        "c:\\Users\\crepi\\Downloads\\gson-2.8.2.jar",
+        "c:\\Users\\crepi\\Downloads\\json-20240205.jar"
+    ],
+    "java.debug.settings.onBuildFailureProceed": true
 }

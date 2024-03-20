@@ -35,11 +35,12 @@ import Organisation.Models.*;
             System.out.println("3- Mettre a jour un appareil");
             System.out.println("4-Supprimer un appareil");
             System.out.println("5-Quitter");
+
             System.out.print("Veiller choisir une option svp: ");
 
             switch (ObjetConnecte.verificationEntier()) { // Appel de la methode pour verifier si l'entree est un entier
                 case 1:
-                    ObjetConnecte.ajouterAppareil();
+                  //  ObjetConnecte.ajouterAppareil();
                     break;
                 case 2:
                     ObjetConnecte.afficherAppareil(); // Afficher les appareils correspondant au nom spécifié
